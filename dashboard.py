@@ -1,128 +1,77 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-import os
 
 # --- CONFIGURAZIONE PAGINA ---
 st.set_page_config(page_title="Trust Radar Pro", layout="wide")
 
-# --- CSS DARK NEON AVANZATO ---
+# --- CSS DARK NEON (BLINDATO) ---
 st.markdown("""
-    <style>
+<style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-    
     .stApp { background-color: #0b0e14; color: white; font-family: 'Inter', sans-serif; }
-    
     .header-title {
-        font-size: 52px; font-weight: 800;
+        font-size: 50px; font-weight: 800; text-align: center; margin-bottom: 30px;
         background: linear-gradient(90deg, #ff4bb4, #00d2ff);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        text-align: center; margin-bottom: 40px;
     }
+    /* Rimuove padding inutile dalle colonne di Streamlit */
+    [data-testid="column"] { padding: 0 10px !important; }
+</style>
+""", unsafe_allow_html=True)
 
-    .bank-card {
-        background: #161b22; border: 1px solid #30363d; border-radius: 24px;
-        padding: 24px; margin-bottom: 25px; position: relative; height: 280px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        transition: all 0.3s ease;
-    }
-    .bank-card:hover { border-color: #00d2ff; transform: translateY(-8px); box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
-
-    /* Logo Banca */
-    .logo-container {
-        width: 50px; height: 50px; background: white; border-radius: 12px;
-        padding: 5px; display: flex; align-items: center; justify-content: center;
-        margin-bottom: 15px; overflow: hidden;
-    }
-    .logo-img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-    /* Cerchio Punteggio */
-    .score-circle {
-        position: absolute; top: 24px; right: 24px;
-        width: 65px; height: 65px; border: 4px solid #00d2ff; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 22px; font-weight: 800; color: white; background: #0b0e14;
-    }
-
-    .name { font-size: 24px; font-weight: 700; color: white; margin-bottom: 2px; }
-    .url { font-size: 13px; color: #8b949e; margin-bottom: 15px; }
-
-    /* Stelline Trustpilot */
-    .star { font-size: 20px; margin-right: 2px; }
-    .star-filled { color: #00b67a; } /* Sarà dinamico nel codice */
-    .star-empty { color: #30363d; }
-
-    .tag-status {
-        padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;
-        margin-left: 10px; text-transform: uppercase;
-    }
-
-    .rev-info { font-size: 14px; color: #8b949e; margin-top: 30px; display: block; }
-    .footer-link { font-size: 12px; color: #00d2ff; text-decoration: none; margin-top: 10px; display: block; }
-    </style>
-    """, unsafe_allow_html=True)
-
-# --- FUNZIONE LOGICA STELLE ---
-def get_stars_html(score):
-    # Colore in base al punteggio (Stile Trustpilot)
+# --- FUNZIONE GENERAZIONE CARD (SENZA BUG DI TESTO) ---
+def draw_card(name, url, score, revs, trend):
+    # Colore in base al punteggio
     color = "#00b67a" if score >= 4 else ("#ff8622" if score >= 3 else "#ff3722")
-    full_stars = round(score)
-    stars_html = ""
+    status = "ECCELLENTE" if score >= 4 else ("BUONO" if score >= 3 else "SCARSO")
+    
+    # Stelline Trustpilot
+    stars = ""
     for i in range(5):
-        if i < full_stars:
-            stars_html += f'<span class="star" style="color:{color}">★</span>'
-        else:
-            stars_html += '<span class="star star-empty">★</span>'
-    return stars_html
+        stars += f"<span style='color:{color if i < round(score) else '#30363d'}; font-size:20px;'>★</span>"
+    
+    # Trend Icon
+    t_icon = "↑" if trend == "su" else ("↓" if trend == "giu" else "→")
+    t_color = "#00ff88" if t_icon == "↑" else ("#ff3722" if t_icon == "↓" else "#8b949e")
+
+    # Logo via Google Favicon (Più stabile)
+    domain = url.lower().replace("www.", "")
+    logo_url = f"https://www.google.com/s2/favicons?domain={domain}&sz=128"
+
+    # HTML COMPATTATO (Evita la visualizzazione del codice di programmazione)
+    html = f"""<div style="background:#161b22; border:1px solid #30363d; border-radius:20px; padding:24px; position:relative; height:270px; margin-bottom:20px; box-shadow:0 10px 20px rgba(0,0,0,0.4);">
+<div style="position:absolute; top:24px; right:24px; width:60px; height:60px; border:4px solid #00d2ff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; background:#0b0e14;">{score}</div>
+<div style="width:50px; height:50px; background:white; border-radius:10px; padding:5px; margin-bottom:15px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+<img src="{logo_url}" style="max-width:100%; max-height:100%;" onerror="this.src='https://ui-avatars.com/api/?name={name}&background=random'"></div>
+<div style="font-size:22px; font-weight:700; color:white; margin-bottom:2px;">{name}</div>
+<div style="font-size:13px; color:#8b949e; margin-bottom:15px;">{url}</div>
+<div style="margin:10px 0;">{stars} <span style="color:{color}; font-size:11px; font-weight:800; margin-left:8px; border:1px solid {color}; padding:2px 6px; border-radius:4px;">{status}</span></div>
+<div style="margin-top:25px; display:flex; justify-content:space-between; align-items:center;">
+<span style="font-size:14px; color:#8b949e;">Recensioni: <b>{revs}</b> <span style="color:{t_color}; margin-left:5px;">{t_icon}</span></span>
+<a href="https://it.trustpilot.com/review/{url}" target="_blank" style="color:#00d2ff; text-decoration:none; font-size:12px;">Trustpilot ↗</a>
+</div></div>"""
+    return st.markdown(html, unsafe_allow_html=True)
 
 # --- TITOLO ---
 st.markdown('<h1 class="header-title">TRUST RADAR</h1>', unsafe_allow_html=True)
 
 # --- CARICAMENTO DATI ---
 try:
+    # Carichiamo il CSV dal tuo repository
     df = pd.read_csv('dati_banche.csv')
     df = df.sort_values(by="TrustScore", ascending=False)
+    st.write(f"📊 Dati aggiornati al: **{datetime.now().strftime('%d %B %Y')}**")
 except:
-    st.error("Assicurati di avere il file dati_banche.csv su GitHub!")
+    st.error("Errore: Il file 'dati_banche.csv' non è stato trovato o è formattato male.")
     st.stop()
 
 # --- GRIGLIA CARD ---
 for i in range(0, len(df), 3):
     cols = st.columns(3)
     chunk = df.iloc[i:i+3]
-    for j, (_, bank) in enumerate(chunk.iterrows()):
+    for j, (_, row) in enumerate(chunk.iterrows()):
         with cols[j]:
-            # Generazione Stelle
-            stars = get_stars_html(bank['TrustScore'])
-            
-            # Colore stato
-            s_color = "#00b67a" if bank['TrustScore'] >= 4 else ("#ff8622" if bank['TrustScore'] >= 3 else "#ff3722")
-            s_text = "ECCELLENTE" if bank['TrustScore'] >= 4 else ("BUONO" if bank['TrustScore'] >= 3 else "SCARSO")
-            
-            # Logo automatico via Clearbit (usando il dominio in minuscolo)
-            domain = bank['URL'].lower().replace("www.", "")
-            logo_url = f"https://logo.clearbit.com/{domain}"
-            
-            # HTML UNICO (Per evitare bug del testo di programmazione)
-            card_html = f"""
-            <div class="bank-card">
-                <div class="score-circle">{bank['TrustScore']}</div>
-                <div class="logo-container">
-                    <img src="{logo_url}" class="logo-img" onerror="this.src='https://ui-avatars.com/api/?name={bank['Banca']}&background=random'">
-                </div>
-                <div class="name">{bank['Banca']}</div>
-                <div class="url">{bank['URL']}</div>
-                
-                <div style="margin: 15px 0;">
-                    {stars}
-                    <span style="color:{s_color}; font-size:12px; font-weight:700; margin-left:10px;">{s_text}</span>
-                </div>
-                
-                <span class="rev-info">Recensioni: <b>{bank['Recensioni']}</b></span>
-                <a href="https://it.trustpilot.com/review/{bank['URL']}" target="_blank" class="footer-link">Vedi su Trustpilot ↗</a>
-            </div>
-            """
-            st.markdown(card_html, unsafe_allow_html=True)
+            draw_card(row['Banca'], row['URL'], row['TrustScore'], row['Recensioni'], row['Trend'])
 
-st.markdown("---")
-st.caption(f"Ultimo aggiornamento manuale: {datetime.now().strftime('%d %B %Y')}")
+st.markdown("<br><hr><center style='color:#8b949e; font-size:12px;'>Dashboard Privata • Dati estratti da Trustpilot</center>", unsafe_allow_html=True)
