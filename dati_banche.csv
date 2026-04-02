@@ -1,16 +1,16 @@
 Banca,URL,TrustScore,Recensioni,Trend
-BBVA Italia,www.bbva.it,4.8,16K,su
-Revolut,www.revolut.com,4.2,148K,stabile
+BBVA Italia,bbva.it,4.8,16K,su
+Revolut,revolut.com,4.2,148K,stabile
 Fineco,finecobank.com,4.1,26K,su
-Isybank,www.isybank.com,3.9,1.3K,su
-Findomestic,www.findomestic.it,3.4,19K,giu
-Mediolanum,www.bancamediolanum.it,2.4,2.2K,stabile
-BPER Banca,www.bper.it,2.1,3.8K,giu
-Credem,www.credem.it,1.8,950,stabile
-Credit Agricole,www.credit-agricole.it,1.7,4.3K,giu
-ING Italia,www.ing.it,1.6,12K,giu
-UniCredit,www.unicredit.it,1.4,8.7K,giu
-Intesa Sanpaolo,www.intesasanpaolo.com,1.3,11K,giu
-BNL Bnp Paribas,www.bnl.it,1.2,5.5K,giu
-Poste Italiane,www.poste.it,1.2,26K,giu
-Banco Posta,www.poste.it,1.1,4.2K,giu
+Isybank,isybank.com,3.9,1.3K,su
+Findomestic,findomestic.it,3.4,19K,giu
+Mediolanum,bancamediolanum.it,2.4,2.2K,stabile
+BPER Banca,bper.it,2.1,3.8K,giu
+Credem,credem.it,1.8,950,stabile
+Credit Agricole,credit-agricole.it,1.7,4.3K,giu
+ING Italia,ing.it,1.6,12K,giu
+UniCredit,unicredit.it,1.4,8.7K,giu
+Intesa Sanpaolo,intesasanpaolo.com,1.3,11K,giu
+BNL Bnp Paribas,bnl.it,1.2,5.5K,giu
+Poste Italiane,poste.it,1.2,26K,giu
+Banco Posta,poste.it,1.1,4.2K,giu
